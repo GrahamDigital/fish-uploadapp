@@ -51,7 +51,7 @@ function build_app -d "Build apps for Graham Digital"
     echo "VERSION_CODE=$NEW_VERSION_CODE" > version.properties
     echo "VERSION_NAME=$bversion" >> version.properties
 
-    function build_apple
+    if test "$app_type" = "apple"
         if test $upload -ne 0
             if test -z $ITC_PW
                 printf "Upload is set, but no ITunesConnect password specified, unset upload with -u or set \$ITC_PW"
@@ -125,9 +125,7 @@ function build_app -d "Build apps for Graham Digital"
                 end
             end
         end
-    end
-
-    function build_android
+    else if test "$app_type" = "android"
         printf "Cleaning project\n\n"
 
         ./gradlew clean 2>&1 >>$BUILD_LOG
@@ -159,12 +157,6 @@ function build_app -d "Build apps for Graham Digital"
                 end
             end
         end
-    end
-
-    if test "$app_type" = "apple"
-        build_apple
-    else if test "$app_type" = "android"
-        build_android
     end
 
     if test $ex_t -ne 0
