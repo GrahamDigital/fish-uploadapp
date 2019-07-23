@@ -31,7 +31,7 @@ function build_app -d "Build apps for Graham Digital"
         set app_type "apple"
     else
         printf "Couldn't find gradle or xcodeproject, unknown build"
-        exit 3
+        return 3
     end
 
     set flavor (random choice $FLAVORS)
@@ -55,10 +55,10 @@ function build_app -d "Build apps for Graham Digital"
         if test $upload -ne 0
             if test -z $ITC_PW
                 printf "Upload is set, but no ITunesConnect password specified, unset upload with -u or set \$ITC_PW"
-                exit 3
+                return 3
             else if test -z $ITC_USER
                 printf "Upload is set, but no ITunesConnect user specified, unset upload with -u or set \$ITC_USER"
-                exit 3
+                return 3
             end
         end
 
@@ -132,7 +132,7 @@ function build_app -d "Build apps for Graham Digital"
 
         if test $status -ne 0
             printf "Failed to clean, aborting"
-            exit 2
+            return 2
         end
 
         for flavor in $FLAVORS
@@ -161,6 +161,6 @@ function build_app -d "Build apps for Graham Digital"
 
     if test $ex_t -ne 0
         printf "Not all builds were successful\n"
-        exit $ex_t
+        return $ex_t
     end
 end
