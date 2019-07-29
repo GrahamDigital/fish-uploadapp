@@ -6,6 +6,7 @@ function build_app -d "Build apps for Graham Digital"
     set bversion
     set upload 1
     set -l app_type "unknown"
+    set taggit 0
 
     mkdir -p build
     set BUILD_LOG build/build_log.log
@@ -20,6 +21,8 @@ function build_app -d "Build apps for Graham Digital"
                 set upload 0
             case v bversion
                 set bversion $value
+            case g "tag-git"
+                set taggit 1
             case _
                 printf "error: Unknown option %s\n" $option
         end
@@ -162,5 +165,10 @@ function build_app -d "Build apps for Graham Digital"
     if test $ex_t -ne 0
         printf "Not all builds were successful\n"
         return $ex_t
+    else if test $taggit -ne 0
+        git commit -am"Auto build $bversion($NEW_VERSION_CODE)"
+        git push
+        git tag "nightly/$NEW_VERSION_CODE"
+        git push --tags
     end
 end
