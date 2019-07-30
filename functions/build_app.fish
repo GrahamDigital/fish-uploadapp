@@ -1,17 +1,35 @@
 #/usr/bin/fish
 
 function build_app -d "Build apps for Graham Digital"
-    set FLAVORS (ls Flavors/)
     set ex_t 0
     set bversion
     set upload 1
-    set -l app_type "unknown"
     set taggit 0
 
-    mkdir -p build
-    set BUILD_LOG build/build_log.log
+    if test -e ./gradle
+        set app_type "android"
+    else if test 0 -lt (find . -maxdepth 1 -name "*.xcworkspace" | wc -l)
+        set app_type "apple"
+    else
+        printf "Couldn't find gradle or xcodeproject, unknown build"
+        return 3
+    end
 
-    date >$BUILD_LOG
+    if test -d Flavors
+        set FLAVORS (ls Flavors/)
+    else
+        printf "Cannot find Flavors directory"
+    end
+
+    set build_dir (realpath build_script)
+    mkdir -p $build_dir
+    if test -d $build_dir
+        set BUILD_LOG $build_dir/build_log.log
+        date >$BUILD_LOG
+    else
+        printf "Unable to create build directory"
+        return 2
+    end
 
     getopts $argv | while read -l key value
         switch $key
@@ -28,17 +46,6 @@ function build_app -d "Build apps for Graham Digital"
         end
     end
 
-    if test -e ./gradle
-        set app_type "android"
-    else if test -n '(find . -name "*.xcodeproj")'
-        set app_type "apple"
-    else
-        printf "Couldn't find gradle or xcodeproject, unknown build"
-        return 3
-    end
-
-    set flavor (random choice $FLAVORS)
-
     set OLD_VERSION_NAME (grep VERSION_NAME version.properties | cut -d'=' -f2)
 
     if test -z $bversion
@@ -51,8 +58,8 @@ function build_app -d "Build apps for Graham Digital"
     printf "Building apps: %s\nVersion: %s\n" (string join ", " $FLAVORS) (echo $bversion; or "??")
     set OLD_VERSION_CODE (grep VERSION_CODE version.properties | cut -d'=' -f2)
     set NEW_VERSION_CODE (math $OLD_VERSION_CODE+1)
-    echo "VERSION_CODE=$NEW_VERSION_CODE" > version.properties
-    echo "VERSION_NAME=$bversion" >> version.properties
+    echo "VERSION_CODE=$NEW_VERSION_CODE" >version.properties
+    echo "VERSION_NAME=$bversion" >>version.properties
 
     if test "$app_type" = "apple"
         if test $upload -ne 0
@@ -139,7 +146,8 @@ function build_app -d "Build apps for Graham Digital"
         end
 
         for flavor in $FLAVORS
-            if test $flavor != "demo"; and test $upload -ne 0
+            if test $flavor != "demo"
+                and test $upload -ne 0
                 printf "%s: building version %s (%s)\n\n" $flavor $bversion $NEW_VERSION_CODE
                 ./gradlew publish{$flavor}ReleaseBundle 2>&1 >>$BUILD_LOG
 
@@ -167,8 +175,11 @@ function build_app -d "Build apps for Graham Digital"
         return $ex_t
     else if test $taggit -ne 0
         git commit -am"Auto build $bversion($NEW_VERSION_CODE)"
-        git push
-        git tag "nightly/$NEW_VERSION_CODE"
-        git push --tags
+        and \
+            git tag "nightly/$NEW_VERSION_CODE"
+        and \
+            git push
+        and \
+            git push --tags
     end
 end
