@@ -11,14 +11,14 @@ function build_app -d "Build apps for Graham Digital"
     else if test 0 -lt (find . -maxdepth 1 -name "*.xcworkspace" | wc -l)
         set app_type "apple"
     else
-        printf "Couldn't find gradle or xcodeproject, unknown build"
+        printf "Couldn't find gradle or xcodeproject, unknown build\n"
         return 3
     end
 
     if test -d Flavors
         set FLAVORS (ls Flavors/)
     else
-        printf "Cannot find Flavors directory"
+        printf "Cannot find Flavors directory\n"
     end
 
     set build_dir (realpath build_script)
@@ -27,7 +27,7 @@ function build_app -d "Build apps for Graham Digital"
         set BUILD_LOG $build_dir/build_log.log
         date >$BUILD_LOG
     else
-        printf "Unable to create build directory"
+        printf "Unable to create build directory\n"
         return 2
     end
 
@@ -55,7 +55,7 @@ function build_app -d "Build apps for Graham Digital"
         printf "User input: %s" $bversion >>$BUILD_LOG
     end
 
-    printf "Building apps: %s\nVersion: %s\n" (string join ", " $FLAVORS) (echo $bversion; or "??")
+    printf (set_color cyan --bold)"Building apps: %s\nVersion: %s\n"(set_color normal) (string join ", " $FLAVORS) (echo $bversion; or "??")
     set OLD_VERSION_CODE (grep VERSION_CODE version.properties | cut -d'=' -f2)
     set NEW_VERSION_CODE (math $OLD_VERSION_CODE+1)
     echo "VERSION_CODE=$NEW_VERSION_CODE" >version.properties
@@ -64,19 +64,19 @@ function build_app -d "Build apps for Graham Digital"
     if test "$app_type" = "apple"
         if test $upload -ne 0
             if test -z $ITC_PW
-                printf "Upload is set, but no ITunesConnect password specified, unset upload with -u or set \$ITC_PW"
+                printf "Upload is set, but no iTunesConnect password specified, unset upload with -u or set \$ITC_PW"
                 return 3
             else if test -z $ITC_USER
-                printf "Upload is set, but no ITunesConnect user specified, unset upload with -u or set \$ITC_USER"
+                printf "Upload is set, but no iTunesConnect user specified, unset upload with -u or set \$ITC_USER"
                 return 3
             end
         end
 
-        printf "Updating Pods\n"
+        printf (set_color blue)"Updating Pods\n"(set_color normal)
         pod update 2>&1 >>$BUILD_LOG
 
         if test $status -ne 0
-            printf "Failed to update CocoaPods, aborting"
+            printf (set_color --reverse --bold red)"Failed to update CocoaPods, aborting\a"(set_color normal)
             exit 2
         end
 
@@ -106,7 +106,7 @@ function build_app -d "Build apps for Graham Digital"
                 python3 (dirname (status -f))/__versions.py build -v $NEW_VERSION_CODE $variant >/dev/null
             end
 
-            printf "%s: building version %s (%s)\n" $flavor $bversion $NEW_VERSION_CODE
+            printf (set_color yellow)"\n\n%s: building version %s (%s)\n"(set_color normal) $flavor $bversion $NEW_VERSION_CODE
 
             xcodebuild -workspace *.xcworkspace -allowProvisioningUpdates -scheme $flavor clean archive -archivePath build/$flavor.xcarchive DEVELOPMENT_TEAM=AEJ335Y6NL 2>&1 >>$BUILD_LOG
             if test $status -ne 0
@@ -128,10 +128,10 @@ function build_app -d "Build apps for Graham Digital"
                 /Applications/Xcode.app/Contents/Applications/Application\ Loader.app/Contents/Frameworks/ITunesSoftwareService.framework/Versions/A/Support/altool --upload-app -f build/$flavor.ipa -u $ITC_USER -p $ITC_PW 2>&1 >>$BUILD_LOG
 
                 if test $status -ne 0
-                    printf "%s: Failed to upload\n" $flavor
+                    printf (set_color red)"%s: Failed to upload\n" $flavor(set_color normal)
                     set ex_t 2
                 else
-                    printf "%s: Successfully uploaded\n" $flavor
+                    printf (set_color green)"%s: Successfully uploaded\n" $flavor(set_color normal)
                 end
             end
         end
@@ -152,16 +152,16 @@ function build_app -d "Build apps for Graham Digital"
                 ./gradlew publish{$flavor}ReleaseBundle 2>&1 >>$BUILD_LOG
 
                 if test $status -ne 0
-                    printf "%s: Failed to build and upload\n\n" $flavor
+                    printf (set_color red)"%s: Failed to build and upload\n\n"(set_color normal) $flavor
                     set ex_t 2
                 else
-                    printf "%s: Built and Uploaded\n\n" $flavor
+                    printf (set_color green)"%s: Built and Uploaded\n\n"(set_color normal) $flavor
                 end
             else
                 ./gradlew assemble{$flavor} 2>&1 >>$BUILD_LOG
 
                 if test $status -ne 0
-                    printf "%s: Failed to build and upload\n\n" $flavor
+                    printf (set_color red)"%s: Failed to build and upload\n\n"(set_color normal) $flavor
                     set ex_t 2
                 else
                     printf "%s: Built\n\n" $flavor
@@ -171,10 +171,10 @@ function build_app -d "Build apps for Graham Digital"
     end
 
     if test $ex_t -ne 0
-        printf "Not all builds were successful\n"
+        printf (set_color --reverse --bold red)"Not all builds were successful\n\a"(set_color normal)
         return $ex_t
     else if test $taggit -ne 0
-        git commit -am"Auto build $bversion($NEW_VERSION_CODE)"
+        git commit -am "Auto build $bversion($NEW_VERSION_CODE)"
         and \
             git tag "nightly/$NEW_VERSION_CODE"
         and \
