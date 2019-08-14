@@ -72,11 +72,11 @@ function build_app -d "Build apps for Graham Digital"
             end
         end
 
-        printf (set_color blue)"Updating Pods\n"(set_color normal)
+        printf (set_color blue)"\nUpdating Pods.\n"(set_color normal)
         pod update 2>&1 >>$BUILD_LOG
 
         if test $status -ne 0
-            printf (set_color --reverse --bold red)"Failed to update CocoaPods, aborting\a"(set_color normal)
+            printf (set_color --reverse --bold red)"Failed to update CocoaPods, aborting.\a"(set_color normal)
             exit 2
         end
 
@@ -94,10 +94,10 @@ function build_app -d "Build apps for Graham Digital"
                 end
             end
             if test $scheme_exists -eq 0
-                printf "Ignoring %s: Scheme not found in project\n" $flavor
+                printf "Ignoring %s: Scheme not found in project.\n" $flavor
                 continue
             end
-            printf "%s - %s" $bversion Flavors/$flavor/$flavor-info.plist
+            printf "%s - %s\n" $bversion Flavors/$flavor/$flavor-info.plist
             python3 (dirname (status -f))/__versions.py release -v $bversion Flavors/$flavor/$flavor-info.plist
             python3 (dirname (status -f))/__versions.py build -v $NEW_VERSION_CODE Flavors/$flavor/$flavor-info.plist
 
@@ -106,11 +106,11 @@ function build_app -d "Build apps for Graham Digital"
                 python3 (dirname (status -f))/__versions.py build -v $NEW_VERSION_CODE $variant >/dev/null
             end
 
-            printf (set_color yellow)"\n\n%s: building version %s (%s)\n"(set_color normal) $flavor $bversion $NEW_VERSION_CODE
+            printf (set_color yellow)"\n\n%s: Building version %s (%s).\n"(set_color normal) $flavor $bversion $NEW_VERSION_CODE
 
             xcodebuild -workspace *.xcworkspace -allowProvisioningUpdates -scheme $flavor clean archive -archivePath build/$flavor.xcarchive DEVELOPMENT_TEAM=AEJ335Y6NL 2>&1 >>$BUILD_LOG
             if test $status -ne 0
-                printf "%s: Failed to build" $flavor
+                printf (set_color red)"%s: Failed to build.\n"(set_color normal) $flavor
                 set ex_t 2
                 continue
             end
@@ -118,20 +118,20 @@ function build_app -d "Build apps for Graham Digital"
             xcodebuild -exportArchive -allowProvisioningUpdates -archivePath build/$flavor.xcarchive -exportPath build -exportOptionsPlist export.plist 2>&1 >>$BUILD_LOG
 
             if test $status -ne 0
-                printf "%s: Failed to sign\n" $flavor
+                printf (set_color red)"%s: Failed to sign.\n"(set_color normal) $flavor
                 set ex_t 2
                 continue
             end
 
             if test $upload -ne 0
-                printf "Uploading App %s\n" $flavor
+                printf (set_color yellow)"%s: Uploading to Apple.\n"(set_color normal) $flavor
                 /Applications/Xcode.app/Contents/Applications/Application\ Loader.app/Contents/Frameworks/ITunesSoftwareService.framework/Versions/A/Support/altool --upload-app -f build/$flavor.ipa -u $ITC_USER -p $ITC_PW 2>&1 >>$BUILD_LOG
 
                 if test $status -ne 0
-                    printf (set_color red)"%s: Failed to upload\n" $flavor(set_color normal)
+                    printf (set_color red)"%s: Failed to upload.\n"(set_color normal) $flavor
                     set ex_t 2
                 else
-                    printf (set_color green)"%s: Successfully uploaded\n" $flavor(set_color normal)
+                    printf (set_color green)"%s: Successfully uploaded.\n"(set_color normal) $flavor
                 end
             end
         end
