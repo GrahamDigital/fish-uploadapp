@@ -23,6 +23,7 @@ function build_app -d "Build apps for Graham Digital"
 
     set build_dir (realpath build_script)
     mkdir -p $build_dir
+
     if test -d $build_dir
         set BUILD_LOG $build_dir/build_log.log
         date >$BUILD_LOG
@@ -93,11 +94,12 @@ function build_app -d "Build apps for Graham Digital"
                     break
                 end
             end
+
             if test $scheme_exists -eq 0
                 printf "Ignoring %s: Scheme not found in project.\n" $flavor
                 continue
             end
-            printf "%s - %s\n" $bversion Flavors/$flavor/$flavor-info.plist
+
             python3 (dirname (status -f))/__versions.py release -v $bversion Flavors/$flavor/$flavor-info.plist
             python3 (dirname (status -f))/__versions.py build -v $NEW_VERSION_CODE Flavors/$flavor/$flavor-info.plist
 
@@ -106,7 +108,8 @@ function build_app -d "Build apps for Graham Digital"
                 python3 (dirname (status -f))/__versions.py build -v $NEW_VERSION_CODE $variant >/dev/null
             end
 
-            printf (set_color yellow)"\n\n%s: Building version %s (%s).\n"(set_color normal) $flavor $bversion $NEW_VERSION_CODE
+            printf (set_color yellow)"\n%s: Building version %s (%s).\n"(set_color normal) $flavor $bversion $NEW_VERSION_CODE
+            printf "%s - %s\n" $bversion Flavors/$flavor/$flavor-info.plist
 
             xcodebuild -workspace *.xcworkspace -allowProvisioningUpdates -scheme $flavor clean archive -archivePath build/$flavor.xcarchive DEVELOPMENT_TEAM=AEJ335Y6NL 2>&1 >>$BUILD_LOG
             if test $status -ne 0
