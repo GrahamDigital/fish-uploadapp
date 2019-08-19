@@ -83,7 +83,7 @@ function build_app -d "Build apps for Graham Digital"
 
         for flavor in $FLAVORS
             if test ! -e Flavors/$flavor/$flavor-info.plist
-                printf "Ignoring %s, missing plist to build. Perhaps it is an enterprise?\n\n" $flavor
+                printf "Ignoring %s, missing plist to build. Perhaps it is an enterprise?\n" $flavor
                 continue
             end
 
@@ -99,6 +99,8 @@ function build_app -d "Build apps for Graham Digital"
                 printf "Ignoring %s: Scheme not found in project.\n" $flavor
                 continue
             end
+
+            printf "\n"
 
             python3 (dirname (status -f))/__versions.py release -v $bversion Flavors/$flavor/$flavor-info.plist
             python3 (dirname (status -f))/__versions.py build -v $NEW_VERSION_CODE Flavors/$flavor/$flavor-info.plist
