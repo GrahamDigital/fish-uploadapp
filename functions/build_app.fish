@@ -179,7 +179,8 @@ function build_app -d "Build apps for Graham Digital"
         printf (set_color --reverse --bold red)"Not all builds were successful\n\a"(set_color normal)
         return $ex_t
     else if test $taggit -ne 0
-        git commit -am "Auto build $bversion($NEW_VERSION_CODE)"
+        git add "version.properties"
+        git commit -m "Auto build $bversion($NEW_VERSION_CODE)"
         and \
             git tag "nightly/$NEW_VERSION_CODE"
         and \
