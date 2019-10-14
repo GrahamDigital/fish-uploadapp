@@ -180,6 +180,12 @@ function build_app -d "Build apps for Graham Digital"
         return $ex_t
     else if test $taggit -ne 0
         git add "version.properties"
+        # If there are mapping files, commit them after the build
+        for f in */mapping.txt
+            git add $f
+            break
+        end
+
         git commit -m "Auto build $bversion($NEW_VERSION_CODE)"
         and \
             git tag "nightly/$NEW_VERSION_CODE"
