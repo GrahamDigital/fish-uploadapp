@@ -186,6 +186,10 @@ function build_app -d "Build apps for Graham Digital"
             break
         end
 
+        for f in Flavors/**/*.plist
+            git add $f
+        end
+
         git commit -m "Auto build $bversion($NEW_VERSION_CODE)"
         and \
             git tag "nightly/$NEW_VERSION_CODE"
