@@ -8,7 +8,7 @@ function build_app -d "Build apps for Graham Digital"
 
     if test -e ./gradle
         set app_type "android"
-    else if test 0 -lt (find . -maxdepth 1 -name "*.xcworkspace" | wc -l)
+    else if test 0 -lt (find . -maxdepth 1 -name "*.pbxproj" | wc -l)
         set app_type "apple"
     else
         printf "Couldn't find gradle or xcodeproject, unknown build\n"
