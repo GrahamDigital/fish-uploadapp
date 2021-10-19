@@ -130,7 +130,7 @@ function build_app -d "Build apps for Graham Digital"
 
             if test $upload -ne 0
                 printf (set_color yellow)"%s: Uploading to Apple.\n"(set_color normal) $flavor
-                xcrun altool --upload-app -f build/$flavor.ipa -u $ITC_USER -p $ITC_PW 2>&1 >>$BUILD_LOG
+                xcrun altool --upload-app -f build/$flavor.ipa -t ios -u $ITC_USER -p $ITC_PW 2>&1 >>$BUILD_LOG                
 
                 if test $status -ne 0
                     printf (set_color red)"%s: Failed to upload.\n"(set_color normal) $flavor
