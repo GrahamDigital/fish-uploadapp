@@ -7,16 +7,19 @@ function build_app -d "Build apps for Graham Digital"
     set taggit 0
 
     if test -e ./gradle
+        or test -d android
         set app_type "android"
     else if test 0 -lt (find . -maxdepth 1 -name "*.xcodeproj" | wc -l)
         set app_type "apple"
     else
-        printf "Couldn't find gradle or xcodeproject, unknown build\n"
+        printf "Couldn't find android directory or xcodeproject, unknown build\n"
         return 3
     end
 
     if test -d Flavors
         set FLAVORS (ls Flavors/)
+    else if test -d ./android/Flavors
+        set FLAVORS (ls ./android/Flavors/)
     else
         printf "Cannot find Flavors directory\n"
     end
@@ -30,6 +33,19 @@ function build_app -d "Build apps for Graham Digital"
     else
         printf "Unable to create build directory\n"
         return 2
+    end
+
+    if test -e ./yarn.lock
+        set yarn_file 1
+
+        if test "$app_type" = "android"
+            cd ./android
+        end
+
+        yarn install --frozen-lockfile
+    else
+        set yarn_file 0
+        printf "Did not find yarn.lock file. Moving to the next step\n"
     end
 
     getopts $argv | while read -l key value
@@ -74,7 +90,11 @@ function build_app -d "Build apps for Graham Digital"
         end
 
         printf (set_color blue)"\nUpdating Pods.\n"(set_color normal)
-        pod update 2>&1 >>$BUILD_LOG
+        pod install 2>&1 >>$BUILD_LOG
+
+        if test $yarn_file -ne 0
+            yarn bundle:ios
+        end
 
         if test $status -ne 0
             printf (set_color --reverse --bold red)"Failed to update CocoaPods, aborting.\a"(set_color normal)
@@ -141,8 +161,14 @@ function build_app -d "Build apps for Graham Digital"
             end
         end
     else if test "$app_type" = "android"
-        printf "Cleaning project\n\n"
+        if test $yarn_file -ne 0
+            printf "Commenting lines 228 and 229 in ../node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenContainer.kt \n\n"
+            sed -i '' 's/removeMyFragments/\/\/removeMyFragments/g' ../node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenContainer.kt
+            sed -i '' 's/it.executePendingTransactions/\/\/it.executePendingTransactions/g' ../node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenContainer.kt
+            yarn bundle:android
+        end
 
+        printf "Cleaning project\n\n"
         ./gradlew clean 2>&1 >>$BUILD_LOG
 
         if test $status -ne 0
