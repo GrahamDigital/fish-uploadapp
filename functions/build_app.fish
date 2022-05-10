@@ -162,10 +162,47 @@ function build_app -d "Build apps for Graham Digital"
         end
     else if test "$app_type" = "android"
         if test $yarn_file -ne 0
-            printf "Commenting lines 228 and 229 in ../node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenContainer.kt \n\n"
-            sed -i '' 's/removeMyFragments/\/\/removeMyFragments/g' ../node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenContainer.kt
-            sed -i '' 's/it.executePendingTransactions/\/\/it.executePendingTransactions/g' ../node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenContainer.kt
             yarn bundle:android
+        end
+
+        if test -e ./weatherAppMaster/src/main/res/drawable-mdpi/node_modules_reactnavigation_elements_src_assets_backicon.png
+            rm ./weatherAppMaster/src/main/res/drawable-mdpi/node_modules_reactnavigation_elements_src_assets_backicon.png
+        end
+
+        if test -e ./weatherAppMaster/src/main/res/drawable-hdpi/node_modules_reactnavigation_elements_src_assets_backicon.png
+            rm ./weatherAppMaster/src/main/res/drawable-hdpi/node_modules_reactnavigation_elements_src_assets_backicon.png
+        end
+
+        if test -e ./weatherAppMaster/src/main/res/drawable-xhdpi/node_modules_reactnavigation_elements_src_assets_backicon.png
+            rm ./weatherAppMaster/src/main/res/drawable-xhdpi/node_modules_reactnavigation_elements_src_assets_backicon.png
+        end
+
+        if test -e ./weatherAppMaster/src/main/res/drawable-xxhdpi/node_modules_reactnavigation_elements_src_assets_backicon.png
+            rm ./weatherAppMaster/src/main/res/drawable-xxhdpi/node_modules_reactnavigation_elements_src_assets_backicon.png
+        end
+
+        if test -e ./weatherAppMaster/src/main/res/drawable-xxxhdpi/node_modules_reactnavigation_elements_src_assets_backicon.png
+            rm ./weatherAppMaster/src/main/res/drawable-xxxhdpi/node_modules_reactnavigation_elements_src_assets_backicon.png
+        end
+
+        if test -e ./weatherAppMaster/src/main/res/drawable-mdpi/node_modules_reactnavigation_elements_src_assets_backiconmask.png
+            rm ./weatherAppMaster/src/main/res/drawable-mdpi/node_modules_reactnavigation_elements_src_assets_backiconmask.png
+        end
+
+        if test -e ./weatherAppMaster/src/main/res/drawable-hdpi/node_modules_reactnavigation_elements_src_assets_backiconmask.png
+            rm ./weatherAppMaster/src/main/res/drawable-hdpi/node_modules_reactnavigation_elements_src_assets_backiconmask.png
+        end
+
+        if test -e ./weatherAppMaster/src/main/res/drawable-xhdpi/node_modules_reactnavigation_elements_src_assets_backiconmask.png
+            rm ./weatherAppMaster/src/main/res/drawable-xhdpi/node_modules_reactnavigation_elements_src_assets_backiconmask.png
+        end
+
+        if test -e ./weatherAppMaster/src/main/res/drawable-xxhdpi/node_modules_reactnavigation_elements_src_assets_backiconmask.png
+            rm ./weatherAppMaster/src/main/res/drawable-xxhdpi/node_modules_reactnavigation_elements_src_assets_backiconmask.png
+        end
+
+        if test -e "./weatherAppMaster/src/main/res/drawable-xxxhdpi/node_modules_reactnavigation_elements_src_assets_backiconmask.png"
+            rm ./weatherAppMaster/src/main/res/drawable-xxxhdpi/node_modules_reactnavigation_elements_src_assets_backiconmask.png
         end
 
         printf "Cleaning project\n\n"
